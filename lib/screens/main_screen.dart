@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> {
 
   bool isLoading = true;
 
-  String selectedDeviceId = '';
+  String selectedDeviceId = '8a33956f-a87e-491c-8ba4-ad74b9473110';
 
   List<AppNotification> alertList = [];
 

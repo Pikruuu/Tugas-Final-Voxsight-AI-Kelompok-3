@@ -55,13 +55,12 @@ class _CameraMainState extends State<CameraMain> {
       errorMessage = null;
     });
 
-    // Tambahkan pengecekan ini:
     if (widget.deviceId.isEmpty) {
       setState(() {
         errorMessage = 'Pilih device terlebih dahulu dari Dashboard.';
         isLoading = false;
       });
-      return; // Berhenti di sini, jangan lanjut ke request API
+      return;
     }
 
     try {
@@ -282,28 +281,6 @@ class _CameraMainState extends State<CameraMain> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history, color: Colors.black, size: 24),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Riwayat Kamera',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${cameraHistory.length} entri',
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
             ],
