@@ -282,28 +282,6 @@ class _CameraMainState extends State<CameraMain> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history, color: Colors.black, size: 24),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Riwayat Kamera',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${cameraHistory.length} entri',
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
             ],
           ],
