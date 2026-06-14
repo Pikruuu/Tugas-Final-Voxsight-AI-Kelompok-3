@@ -46,7 +46,7 @@ class CameraService {
 
   // Ganti IP ini dengan IP komputermu saat mengetes di HP fisik
   // Atau biarkan 10.0.2.2 jika menggunakan Android Emulator
-  static const String baseUrl = 'http://10.0.2.2:3000/api'; 
+  static const String baseUrl = 'http://10.0.2.2:8080/api'; 
 
   /// Mengambil data status kamera terbaru dari database backend
   static Future<Map<String, dynamic>> getCameraStatus(String token, String deviceId) async {

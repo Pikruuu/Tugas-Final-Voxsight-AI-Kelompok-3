@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   // Untuk emulator Android gunakan 10.0.2.2.
   // Untuk device fisik gunakan IP host di jaringan yang sama.
-  static const String baseUrl = "http://10.0.2.2:3000/api";
+  static const String baseUrl = "http://10.0.2.2:8080/api";
 
   // DASHBOARD
   static Future<Map<String, dynamic>> getDashboard(String token) async {

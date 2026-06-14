@@ -16,7 +16,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   // Base URL disamakan dengan yang ada di AuthService
-  static const String _baseUrl = 'http://10.0.2.2:3000/api/auth';
+  static const String _baseUrl = 'http://10.0.2.2:8080/api/auth';
 
   // Controller untuk menyimpan dan mengedit informasi personal
   final _nameCtrl = TextEditingController();

@@ -2,7 +2,7 @@ const { query } = require('../config/database');
 
 const getDashboard = async (req, res, next) => {
   try {
-    const id_akun = '597a34a0-2f53-467f-8ada-670e6884fa42';
+    const { id_akun } = req.user;
 
     const devicesResult = await query(
       `SELECT

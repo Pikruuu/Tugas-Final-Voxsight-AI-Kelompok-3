@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   // Ganti dengan IP kamu kalau test di device fisik
   // Untuk emulator Android pakai 10.0.2.2
-  static const String _baseUrl = 'http://10.0.2.2:3000/api/auth';
+  static const String _baseUrl = 'http://10.0.2.2:8080/api/auth';
 
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'refresh_token';

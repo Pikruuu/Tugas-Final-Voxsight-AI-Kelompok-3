@@ -10,8 +10,8 @@ const cameraCtrl = require('../controllers/cameraController');
 const alertCtrl = require('../controllers/alertController');
 
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
-router.get('/dashboard', dashCtrl.getDashboard);
-router.get('/dashboard/device/:id_device', dashCtrl.getDeviceDetail);
+router.get('/dashboard', authenticate, dashCtrl.getDashboard);
+router.get('/dashboard/device/:id_device', authenticate, dashCtrl.getDeviceDetail);
 
 // ─── DEVICES ─────────────────────────────────────────────────────────────────
 router.get('/devices', authenticate, deviceCtrl.getDevices);
@@ -71,9 +71,9 @@ router.post('/camera/:id_device',
 );
 
 // ─── ALERTS ──────────────────────────────────────────────────────────────────
-router.get('/alerts', alertCtrl.getAlerts);
-router.get('/alerts/unread-count', alertCtrl.getUnreadCount);
-router.get('/alerts/device/:id_device', alertCtrl.getDeviceAlerts);
+router.get('/alerts', authenticate, alertCtrl.getAlerts);
+router.get('/alerts/unread-count', authenticate, alertCtrl.getUnreadCount);
+router.get('/alerts/device/:id_device', authenticate, alertCtrl.getDeviceAlerts);
 router.patch('/alerts/:id/read', authenticate, alertCtrl.markAsRead);
 router.patch('/alerts/read-all', authenticate, alertCtrl.markAllAsRead);
 

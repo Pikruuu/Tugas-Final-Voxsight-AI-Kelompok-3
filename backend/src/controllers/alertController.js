@@ -11,8 +11,7 @@ const verifyDeviceOwner = async (id_device, id_akun) => {
 
 const getAlerts = async (req, res, next) => {
   try {
-    console.log("REQ USER =", req.user);
-    const id_akun = "597a34a0-2f53-467f-8ada-670e6884fa42";
+    const { id_akun } = req.user;
     const { is_read, severity, page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 

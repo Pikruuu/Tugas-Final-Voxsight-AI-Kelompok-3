@@ -115,17 +115,34 @@ Future<void> fetchLocationData() async {
         isLoading = false;
       });
 
+      // Hindari pakai mapController lama yang sudah disposed
+      // (terjadi kalau GoogleMap sempat dilepas dari tree saat error sebelumnya)
       if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newLatLng(LatLng(lat, lng)),
-        );
+        try {
+          await mapController!.animateCamera(
+            CameraUpdate.newLatLng(LatLng(lat, lng)),
+          );
+        } catch (_) {
+          // Controller lama sudah disposed, GoogleMap akan rebuild
+          // dan dapat controller baru lewat onMapCreated.
+          mapController = null;
+        }
       }
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
         isLoading = false;
+        // Reset controller karena GoogleMap akan dilepas dari tree
+        // saat tampilan error ditampilkan.
+        mapController = null;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    mapController = null;
+    super.dispose();
   }
 
   LatLng get initialPosition {
