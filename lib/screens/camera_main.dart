@@ -55,13 +55,12 @@ class _CameraMainState extends State<CameraMain> {
       errorMessage = null;
     });
 
-    // Tambahkan pengecekan ini:
     if (widget.deviceId.isEmpty) {
       setState(() {
         errorMessage = 'Pilih device terlebih dahulu dari Dashboard.';
         isLoading = false;
       });
-      return; // Berhenti di sini, jangan lanjut ke request API
+      return;
     }
 
     try {
