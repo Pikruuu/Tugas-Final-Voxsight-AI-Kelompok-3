@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import '../service/auth_service.dart';
 import '../service/camera_service.dart';
 import '../utils/app_theme.dart';
@@ -13,9 +15,16 @@ class CameraMain extends StatefulWidget {
 }
 
 class _CameraMainState extends State<CameraMain> {
+  // Sesuaikan host & port dengan server kamu
+  static const String _wsHost = '10.0.2.2';
+  static const int _wsPort = 1235;
+
   final CameraService _cameraService = CameraService(
-    url: 'wss://voxsight-demo.ngonsul.web.id/watch/PERVOX-0001-22526',
+    url: 'ws://$_wsHost:$_wsPort',
   );
+
+  VideoPlayerController? _videoController;
+  bool _videoInitialized = false;
 
   bool get _isConnected => _cameraService.isConnected;
   bool isLoading = true;
@@ -40,7 +49,28 @@ class _CameraMainState extends State<CameraMain> {
 
   Future<void> stopStream() async {
     await _cameraService.disconnect();
+    _videoController?.pause();
+    _videoController?.dispose();
+    _videoController = null;
+    _videoInitialized = false;
     setState(() {});
+  }
+
+  void _initVideo(String videoUrl) {
+    // Hindari re-init kalau video sudah jalan
+    if (_videoController != null) return;
+
+    final fullUrl = videoUrl.startsWith('http')
+        ? videoUrl
+        : 'http://$_wsHost:$_wsPort$videoUrl';
+
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(fullUrl))
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() => _videoInitialized = true);
+        _videoController!.setLooping(true);
+        _videoController!.play();
+      });
   }
 
   @override
@@ -69,8 +99,10 @@ class _CameraMainState extends State<CameraMain> {
         throw Exception('Token tidak ditemukan. Mohon login ulang.');
       }
 
-      final status = await CameraService.getCameraStatus(token, widget.deviceId);
-      final history = await CameraService.getCameraHistory(token, widget.deviceId);
+      final status =
+          await CameraService.getCameraStatus(token, widget.deviceId);
+      final history =
+          await CameraService.getCameraHistory(token, widget.deviceId);
 
       setState(() {
         cameraStatus = status;
@@ -87,6 +119,7 @@ class _CameraMainState extends State<CameraMain> {
 
   @override
   void dispose() {
+    _videoController?.dispose();
     _cameraService.dispose();
     super.dispose();
   }
@@ -141,15 +174,43 @@ class _CameraMainState extends State<CameraMain> {
                             stream: _cameraService.stream,
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
-                                return Center(
-                                  child: Text(
-                                    snapshot.data!,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
+                                Map<String, dynamic>? data;
+                                try {
+                                  data = jsonDecode(snapshot.data!)
+                                      as Map<String, dynamic>;
+                                } catch (_) {
+                                  data = null;
+                                }
+
+                                final videoUrl = data?['videoUrl'] as String?;
+
+                                if (videoUrl != null) {
+                                  _initVideo(videoUrl);
+                                }
+
+                                if (_videoController != null &&
+                                    _videoInitialized) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: SizedBox.expand(
+                                      child: FittedBox(
+                                        fit: BoxFit.cover,
+                                        child: SizedBox(
+                                          width: _videoController!
+                                              .value.size.width,
+                                          height: _videoController!
+                                              .value.size.height,
+                                          child: VideoPlayer(_videoController!),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  );
+                                }
+
+                                // Belum ada videoUrl atau video belum siap
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white),
                                 );
                               } else if (snapshot.hasError) {
                                 return Center(
@@ -260,7 +321,9 @@ class _CameraMainState extends State<CameraMain> {
                     Text(
                       displayStatus,
                       style: TextStyle(
-                        color: displayStatus == 'Online' ? Colors.green : Colors.red,
+                        color: displayStatus == 'Online'
+                            ? Colors.green
+                            : Colors.red,
                         fontWeight: FontWeight.bold,
                         fontSize: 10,
                       ),
@@ -268,10 +331,34 @@ class _CameraMainState extends State<CameraMain> {
                   ],
                 ),
               ),
-              _buildInfoRow('FPS', valueOrFallback(cameraStatus?['fps'], 'N/A')),
-              _buildInfoRow('Focus', valueOrFallback(cameraStatus?['values_focus'], 'N/A')),
-              _buildInfoRow('Lens clarity', valueOrFallback(cameraStatus?['value_clarity'], 'N/A')),
-              _buildInfoRow('Latency', valueOrFallback(cameraStatus?['latency'], 'N/A')),
+              _buildInfoRow(
+                'FPS',
+                displayStatus == 'Online'
+                    ? valueOrFallback(cameraStatus?['fps'], 'N/A')
+                    : '',
+                isOffline: displayStatus != 'Online',
+              ),
+              _buildInfoRow(
+                'Focus',
+                displayStatus == 'Online'
+                    ? valueOrFallback(cameraStatus?['values_focus'], 'N/A')
+                    : '',
+                isOffline: displayStatus != 'Online',
+              ),
+              _buildInfoRow(
+                'Lens clarity',
+                displayStatus == 'Online'
+                    ? valueOrFallback(cameraStatus?['value_clarity'], 'N/A')
+                    : '',
+                isOffline: displayStatus != 'Online',
+              ),
+              _buildInfoRow(
+                'Latency',
+                displayStatus == 'Online'
+                    ? valueOrFallback(cameraStatus?['latency'], 'N/A')
+                    : '',
+                isOffline: displayStatus != 'Online',
+              ),
               if (cameraHistory.isNotEmpty)
                 Container(
                   width: double.infinity,
@@ -290,7 +377,7 @@ class _CameraMainState extends State<CameraMain> {
     );
   }
 
-  Widget _buildInfoRow(String title, String value) {
+  Widget _buildInfoRow(String title, String value, {bool isOffline = false}) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
@@ -314,8 +401,8 @@ class _CameraMainState extends State<CameraMain> {
           const Spacer(),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.green,
+            style: TextStyle(
+              color: isOffline ? Colors.red : Colors.green,
               fontWeight: FontWeight.bold,
               fontSize: 10,
             ),
